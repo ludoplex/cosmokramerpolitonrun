@@ -24,9 +24,7 @@ def test_preserve_fds_0():
     conf['process']['args'] = ['/init', 'ls', '/proc/1/fd']
     out, _ = run_and_get_output(conf, preserve_fds="0", hide_stderr=True)
     files = [x for x in out.split('\n') if len(x) > 0 and x[0] != '.']
-    if all([int(x) < 3 for x in files]):
-        return 0
-    return -1
+    return 0 if all(int(x) < 3 for x in files) else -1
 
 def test_preserve_fds_some():
     conf = base_config()
@@ -41,9 +39,7 @@ def test_preserve_fds_some():
                     pass
         out, _ = run_and_get_output(conf, preserve_fds="100", hide_stderr=True)
     files = [x for x in out.split('\n') if len(x) > 0 and x[0] != '.']
-    if any([int(x) > 3 for x in files]):
-        return 0
-    return -1
+    return 0 if any(int(x) > 3 for x in files) else -1
 
 all_tests = {
     "preserve-fds-0" : test_preserve_fds_0,

@@ -27,7 +27,7 @@ def test_update():
     temp_dir = tempfile.mkdtemp(dir=get_tests_root())
     out, container_id = run_and_get_output(conf, detach=True)
     try:
-        p = "/sys/fs/cgroup/memory/system.slice/libcrun-%s.scope/memory.limit_in_bytes" % container_id
+        p = f"/sys/fs/cgroup/memory/system.slice/libcrun-{container_id}.scope/memory.limit_in_bytes"
         if not os.path.exists(p):
             return 77
         with open(p) as f:

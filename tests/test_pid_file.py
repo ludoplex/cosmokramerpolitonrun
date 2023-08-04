@@ -22,7 +22,7 @@ def test_pid_file():
     conf = base_config()
     add_all_namespaces(conf)
     conf['process']['args'] = ['/init', 'cwd', '']
-    pid_file = os.path.abspath('test-pid-%s' % os.getpid())
+    pid_file = os.path.abspath(f'test-pid-{os.getpid()}')
     try:
         run_and_get_output(conf, pid_file=pid_file)
         with open(pid_file) as p:

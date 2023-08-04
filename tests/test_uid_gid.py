@@ -36,7 +36,7 @@ def test_userns_full_mapping():
     conf['linux']['gidMappings'] = fullMapping
 
     for filename in ['uid_map', 'gid_map']:
-        conf['process']['args'] = ['/init', 'cat', '/proc/self/%s' % filename]
+        conf['process']['args'] = ['/init', 'cat', f'/proc/self/{filename}']
         out, _ = run_and_get_output(conf)
         proc_status = parse_proc_status(out)
 
@@ -56,10 +56,7 @@ def test_uid():
     proc_status = parse_proc_status(out)
 
     ids = proc_status['Uid'].split()
-    for i in ids:
-        if i != "1000":
-            return -1
-    return 0
+    return next((-1 for i in ids if i != "1000"), 0)
 
 def test_gid():
     if is_rootless():
@@ -72,10 +69,7 @@ def test_gid():
     proc_status = parse_proc_status(out)
 
     ids = proc_status['Gid'].split()
-    for i in ids:
-        if i != "1000":
-            return -1
-    return 0
+    return next((-1 for i in ids if i != "1000"), 0)
 
 def test_no_groups():
     if is_rootless():
@@ -88,9 +82,7 @@ def test_no_groups():
     proc_status = parse_proc_status(out)
 
     ids = proc_status['Groups'].split()
-    if len(ids) > 0:
-        return -1
-    return 0
+    return -1 if len(ids) > 0 else 0
 
 def test_keep_groups():
     if is_rootless():
@@ -102,17 +94,14 @@ def test_keep_groups():
         conf = base_config()
         conf['process']['args'] = ['/init', 'cat', '/proc/self/status']
         add_all_namespaces(conf)
-        conf['annotations'] = {}
-        conf['annotations']['run.oci.keep_original_groups'] = "1"
+        conf['annotations'] = {'run.oci.keep_original_groups': "1"}
         out, _ = run_and_get_output(conf)
     finally:
         os.setgroups(oldgroups)
 
     proc_status = parse_proc_status(out)
     ids = proc_status['Groups'].split()
-    if len(ids) == 0:
-        return -1
-    return 0
+    return -1 if len(ids) == 0 else 0
 
 all_tests = {
     "uid" : test_uid,

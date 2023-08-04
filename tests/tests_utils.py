@@ -144,24 +144,22 @@ def parse_proc_status(content):
     return r
 
 def add_all_namespaces(conf, cgroupns=False, userns=False, netns=True, ipcns=True, utsns=True, pidns=True,time=False):
-    has = {}
-    for i in conf['linux']['namespaces']:
-        has[i['type']] = i['type']
+    has = {i['type']: i['type'] for i in conf['linux']['namespaces']}
     namespaces = []
     if pidns:
-        namespaces = namespaces + ['pid']
+        namespaces += ['pid']
     if utsns:
-        namespaces = namespaces + ['uts']
+        namespaces += ['uts']
     if cgroupns:
-        namespaces = namespaces + ["cgroup"]
+        namespaces += ["cgroup"]
     if ipcns:
-        namespaces = namespaces + ["ipc"]
+        namespaces += ["ipc"]
     if userns:
-        namespaces = namespaces + ["user"]
+        namespaces += ["user"]
     if netns:
-        namespaces = namespaces + ["network"]
+        namespaces += ["network"]
     if time:
-        namespaces = namespaces + ["time"]
+        namespaces += ["time"]
     for i in namespaces:
         if i not in has:
             conf['linux']['namespaces'].append({"type" : i})
@@ -226,7 +224,7 @@ def run_and_get_output(config, detach=False, preserve_fds=None, pid_file=None,
         f.write("file")
 
     if id_container is None:
-        id_container = 'test-%s' % os.path.basename(temp_dir)
+        id_container = f'test-{os.path.basename(temp_dir)}'
 
     config_path = os.path.join(temp_dir, relative_config_path)
     config_dir = os.path.dirname(config_path)
@@ -248,10 +246,8 @@ def run_and_get_output(config, detach=False, preserve_fds=None, pid_file=None,
     os.symlink("../usr/share/zoneinfo/Europe/Rome", os.path.join(rootfs, "etc/localtime"))
     os.symlink("../foo/bar/not/here", os.path.join(rootfs, "etc/not-existing"))
 
-    # Populate /etc/passwd inside container rootfs with users root and test for various test-cases.
-    passwd = open(os.path.join(rootfs, "usr/share/passwd"), "w")
-    passwd.writelines(["root:x:0:0:root:/root:/bin/bash", "\ntest:x:1000:1000:test:/var/empty:/bin/bash"])
-    passwd.close()
+    with open(os.path.join(rootfs, "usr/share/passwd"), "w") as passwd:
+        passwd.writelines(["root:x:0:0:root:/root:/bin/bash", "\ntest:x:1000:1000:test:/var/empty:/bin/bash"])
     os.symlink("../usr/share/passwd", os.path.join(rootfs, "etc/passwd"))
 
     if chown_rootfs_to is not None:
@@ -279,14 +275,13 @@ def run_and_get_output(config, detach=False, preserve_fds=None, pid_file=None,
         stdin = subprocess.DEVNULL
         stdout = subprocess.DEVNULL
         stderr = subprocess.DEVNULL
-    if use_popen:
-        if not stdout:
-            stdout=subprocess.PIPE
-        return subprocess.Popen(args, cwd=temp_dir, stdout=stdout,
-                                stderr=stderr, stdin=stdin, env=env,
-                                close_fds=False), id_container
-    else:
+    if not use_popen:
         return subprocess.check_output(args, cwd=temp_dir, stderr=stderr, env=env, close_fds=False).decode(), id_container
+    if not stdout:
+        stdout=subprocess.PIPE
+    return subprocess.Popen(args, cwd=temp_dir, stdout=stdout,
+                            stderr=stderr, stdin=stdin, env=env,
+                            close_fds=False), id_container
 
 def run_crun_command(args):
     root = get_tests_root_status()
@@ -323,7 +318,11 @@ def is_rootless():
     return True
 
 def get_crun_feature_string():
-    for i in run_crun_command(['--version']).split('\n'):
-        if i.startswith('+'):
-            return i
-    return ''
+    return next(
+        (
+            i
+            for i in run_crun_command(['--version']).split('\n')
+            if i.startswith('+')
+        ),
+        '',
+    )

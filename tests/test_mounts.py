@@ -51,9 +51,7 @@ def test_mount_symlink():
     mount_opt = {"destination": "/etc/localtime", "type": "bind", "source": "/etc/localtime", "options": ["bind", "ro"]}
     conf['mounts'].append(mount_opt)
     out, _ = run_and_get_output(conf, hide_stderr=True)
-    if "Rome" in out:
-        return 0
-    return -1
+    return 0 if "Rome" in out else -1
 
 def test_ro_cgroup():
     for cgroupns in [True, False]:
@@ -64,20 +62,20 @@ def test_ro_cgroup():
                 add_all_namespaces(conf, cgroupns=cgroupns, netns=netns)
                 mounts = [
                     {
-	                "destination": "/sys",
-	                "type": "sysfs",
-	                "source": "sysfs",
-	                "options": [
-		            "nosuid",
-		            "noexec",
-		            "nodev",
-		            "ro"
-	                ]
-	            },
+                "destination": "/sys",
+                "type": "sysfs",
+                "source": "sysfs",
+                "options": [
+                "nosuid",
+                "noexec",
+                "nodev",
+                "ro"
+                ]
+                },
                     {
-	                "destination": "/proc",
-	                "type": "proc"
-	            }
+                "destination": "/proc",
+                "type": "proc"
+                }
                 ]
 
                 if has_cgroup_mount:
@@ -99,7 +97,10 @@ def test_ro_cgroup():
                 for i in reversed(out.split("\n")):
                     if i.find("/sys/fs/cgroup") >= 0:
                         if i.find("ro,") < 0:
-                            print("fail with cgroupns=%s, netns=%s and cgroup_mount=%s, got %s" % (cgroupns, netns, has_cgroup_mount, i), file=sys.stderr)
+                            print(
+                                f"fail with cgroupns={cgroupns}, netns={netns} and cgroup_mount={has_cgroup_mount}, got {i}",
+                                file=sys.stderr,
+                            )
                             return -1
                         break
     return 0
@@ -111,9 +112,7 @@ def test_mount_symlink_not_existing():
     mount_opt = {"destination": "/etc/not-existing", "type": "bind", "source": "/etc/localtime", "options": ["bind", "ro"]}
     conf['mounts'].append(mount_opt)
     out, _ = run_and_get_output(conf, hide_stderr=True)
-    if "foo/bar" in out:
-        return 0
-    return -1
+    return 0 if "foo/bar" in out else -1
 
 def test_mount_readonly_should_inherit_options_from_parent():
     conf = base_config()
@@ -130,9 +129,7 @@ def test_mount_readonly_should_inherit_options_from_parent():
 
     # final mount info must contain /test/world which is converted to readonly
     # but also inherits the flags from its parent
-    if "/test/world ro,nosuid,nodev,noexec,relatime" in out:
-        return 0
-    return -1
+    return 0 if "/test/world ro,nosuid,nodev,noexec,relatime" in out else -1
 
 def test_proc_readonly_should_inherit_options_from_parent():
     conf = base_config()
@@ -148,9 +145,7 @@ def test_proc_readonly_should_inherit_options_from_parent():
 
     # final mount info must contain /proc/bus which is converted to readonly
     # but also inherits the flags from /proc
-    if "/proc/bus ro,nosuid,nodev,noexec,relatime" in out:
-        return 0
-    return -1
+    return 0 if "/proc/bus ro,nosuid,nodev,noexec,relatime" in out else -1
 
 def test_mount_path_with_multiple_slashes():
     conf = base_config()
@@ -159,111 +154,85 @@ def test_mount_path_with_multiple_slashes():
     mount_opt = {"destination": "/test//test", "type": "bind", "source": "/tmp", "options": ["bind"]}
     conf['mounts'].append(mount_opt)
     out, _ = run_and_get_output(conf, hide_stderr=True)
-    if "test/test" in out:
-        return 0
-    return -1
+    return 0 if "test/test" in out else -1
 
 def test_mount_ro():
     a = helper_mount("ro")[0]
     if "ro" not in a:
         return -1
     a = helper_mount("ro", tmpfs=False)[0]
-    if "ro" not in a:
-        return -1
-    return 0
+    return -1 if "ro" not in a else 0
 
 def test_mount_rw():
     a = helper_mount("rw", tmpfs=False)[0]
     if "rw" not in a:
         return -1
     a = helper_mount("rw")[0]
-    if "rw" not in a:
-        return -1
-    return 0
+    return -1 if "rw" not in a else 0
 
 def test_mount_relatime():
     a = helper_mount("relatime", tmpfs=False)[0]
     if "relatime" not in a:
         return -1
     a = helper_mount("relatime")[0]
-    if "relatime" not in a:
-        return -1
-    return 0
+    return -1 if "relatime" not in a else 0
 
 def test_mount_strictatime():
     a = helper_mount("strictatime", tmpfs=False)[0]
     if "relatime" not in a:
         return 0
     a = helper_mount("strictatime")[0]
-    if "relatime" not in a:
-        return 0
-    return -1
+    return 0 if "relatime" not in a else -1
 
 def test_mount_exec():
     a = helper_mount("exec", tmpfs=False)[0]
     if "noexec" in a:
         return -1
     a = helper_mount("exec")[0]
-    if "noexec" in a:
-        return -1
-    return 0
+    return -1 if "noexec" in a else 0
 
 def test_mount_noexec():
     a = helper_mount("noexec", tmpfs=False)[0]
     if "noexec" not in a:
         return -1
     a = helper_mount("noexec")[0]
-    if "noexec" not in a:
-        return -1
-    return 0
+    return -1 if "noexec" not in a else 0
 
 def test_mount_suid():
     a = helper_mount("suid", tmpfs=False)[0]
     if "nosuid" in a:
         return -1
     a = helper_mount("suid")[0]
-    if "nosuid" in a:
-        return -1
-    return 0
+    return -1 if "nosuid" in a else 0
 
 def test_mount_nosuid():
     a = helper_mount("nosuid", tmpfs=False)[0]
     if "nosuid" not in a:
         return -1
     a = helper_mount("nosuid")[0]
-    if "nosuid" not in a:
-        return -1
-    return 0
+    return -1 if "nosuid" not in a else 0
 
 def test_mount_sync():
     a = helper_mount("sync")[1]
-    if "sync" not in a:
-        return -1
-    return 0
+    return -1 if "sync" not in a else 0
 
 def test_mount_dirsync():
     a = helper_mount("dirsync")[1]
-    if "dirsync" not in a:
-        return -1
-    return 0
+    return -1 if "dirsync" not in a else 0
 
 def test_mount_nodev():
     a = helper_mount("nodev", tmpfs=False)[0]
     if "nodev" not in a:
         return -1
     a = helper_mount("nodev")[0]
-    if "nodev" not in a:
-        return -1
-    return 0
+    return -1 if "nodev" not in a else 0
 
 def test_mount_dev():
     a = helper_mount("dev", tmpfs=False)[0]
     if "nodev" in a:
         return -1
     a = helper_mount("dev")[0]
-    if "nodev" in a:
-        return -1
-    return 0
+    return -1 if "nodev" in a else 0
 
 def test_userns_bind_mount():
     if is_rootless():
@@ -329,7 +298,7 @@ def test_userns_bind_mount_symlink():
         conf['process']['args'] = ['/init', 'cat', "/foo/content"]
         out, _ = run_and_get_output(conf, chown_rootfs_to=1)
         if out != "hello":
-            sys.stderr.write("wrong file owner, found %s instead of %s" % (out, "hello"))
+            sys.stderr.write(f"wrong file owner, found {out} instead of hello")
             return -1
     finally:
         shutil.rmtree(bind_dir)
@@ -380,7 +349,7 @@ def test_idmapped_mounts():
             conf['mounts'].append(mount_opt)
             out = run_and_get_output(conf, chown_rootfs_to=1)
             if expected not in out[0]:
-                sys.stderr.write("wrong file owner, found %s instead of %s" % (out[0], expected))
+                sys.stderr.write(f"wrong file owner, found {out[0]} instead of {expected}")
                 return True
             return False
 

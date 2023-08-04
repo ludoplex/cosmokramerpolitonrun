@@ -26,9 +26,7 @@ def tty_helper(fd):
     conf['process']['terminal'] = True
     add_all_namespaces(conf)
     out, _ = run_and_get_output(conf)
-    if "true" not in out:
-        return -1
-    return 0
+    return -1 if "true" not in out else 0
 
 def test_stdin_tty():
     return tty_helper("0")

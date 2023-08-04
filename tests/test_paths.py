@@ -36,9 +36,7 @@ def test_masked_paths():
     conf['linux']['maskedPaths'] = ['/var/file']
     add_all_namespaces(conf)
     out, _ = run_and_get_output(conf, hide_stderr=True)
-    if len(out) > 0:
-        return -1
-    return 0
+    return -1 if len(out) > 0 else 0
     
 all_tests = {
     "readonly-paths" : test_readonly_paths,

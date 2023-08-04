@@ -23,9 +23,7 @@ def test_hostname():
     conf['hostname'] = "foomachine"
     add_all_namespaces(conf)
     out, _ = run_and_get_output(conf)
-    if "foomachine" not in out:
-        return -1
-    return 0
+    return -1 if "foomachine" not in out else 0
     
 all_tests = {
     "hostname" : test_hostname,

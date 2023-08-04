@@ -236,7 +236,7 @@ def test_start():
     cid = None
     try:
         proc, cid = run_and_get_output(conf, command='create', use_popen=True)
-        for i in range(50):
+        for _ in range(50):
             try:
                 s = run_crun_command(["state", cid])
                 break
@@ -268,7 +268,7 @@ def test_start_override_config():
     cid = None
     try:
         proc, cid = run_and_get_output(conf, command='create', use_popen=True, relative_config_path="config/config.json")
-        for i in range(50):
+        for _ in range(50):
             try:
                 s = run_crun_command(["state", cid])
                 break
@@ -290,8 +290,8 @@ def test_run_twice():
     conf['process']['args'] = ['/init', 'echo', 'hi']
     add_all_namespaces(conf)
     try:
-        id_container = "container-%s" % os.getpid()
-        for i in range(2):
+        id_container = f"container-{os.getpid()}"
+        for _ in range(2):
             out, cid = run_and_get_output(conf, command='run', id_container=id_container)
             if "hi" not in str(out):
                 return -1

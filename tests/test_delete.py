@@ -53,10 +53,7 @@ def test_simple_delete():
             return -1
         else:
             # this is expected for cgroup v1 so ignore
-            if not output or b'Device or resource busy' in output:
-                # if output is empty or expected error pass
-                pass
-            else:
+            if output and b'Device or resource busy' not in output:
                 # anything else is error
                 print(output)
                 return -1

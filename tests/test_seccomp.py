@@ -41,7 +41,7 @@ def test_seccomp_listener():
     if not is_seccomp_listener_supported():
         return 77
 
-    listener_path = "%s/seccomp-listener" % get_tests_root()
+    listener_path = f"{get_tests_root()}/seccomp-listener"
     listener_metadata = "SOME-RANDOM-METADATA"
 
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)

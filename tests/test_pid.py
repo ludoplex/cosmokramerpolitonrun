@@ -25,9 +25,7 @@ def test_pid():
     conf['linux']['namespaces'].append({"type" : "pid"})
     out, _ = run_and_get_output(conf)
     pid = parse_proc_status(out)['Pid']
-    if pid == "1":
-        return 0
-    return -1
+    return 0 if pid == "1" else -1
 
 def test_pid_user():
     conf = base_config()
@@ -35,9 +33,7 @@ def test_pid_user():
     add_all_namespaces(conf)
     out, _ = run_and_get_output(conf)
     pid = parse_proc_status(out)['Pid']
-    if pid == "1":
-        return 0
-    return -1
+    return 0 if pid == "1" else -1
 
 all_tests = {
     "pid" : test_pid,

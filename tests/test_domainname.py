@@ -76,8 +76,6 @@ def test_domainname_with_sysctl():
     cid = None
     try:
         out, cid = run_and_get_output(conf)
-        if out == "(none)\n":
-            return 0
         return 0
     except:
         return -1

@@ -25,47 +25,79 @@ def test_no_caps():
     conf = base_config()
     conf['process']['args'] = ['/init', 'cat', '/proc/self/status']
     add_all_namespaces(conf)
-    conf['process']['capabilities'] = {}
-    for i in ['bounding', 'effective', 'inheritable', 'permitted', 'ambient']:
-        conf['process']['capabilities'][i] = []
+    conf['process']['capabilities'] = {
+        i: []
+        for i in [
+            'bounding',
+            'effective',
+            'inheritable',
+            'permitted',
+            'ambient',
+        ]
+    }
     out, _ = run_and_get_output(conf)
     proc_status = parse_proc_status(out)
 
-    for i in ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']:
-        if proc_status[i] != "0000000000000000":
-            return -1
-    return 0
+    return next(
+        (
+            -1
+            for i in ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']
+            if proc_status[i] != "0000000000000000"
+        ),
+        0,
+    )
 
 def test_some_caps():
     conf = base_config()
     conf['process']['args'] = ['/init', 'cat', '/proc/self/status']
     add_all_namespaces(conf)
-    conf['process']['capabilities'] = {}
-    for i in ['bounding', 'effective', 'inheritable', 'permitted', 'ambient']:
-        conf['process']['capabilities'][i] = []
+    conf['process']['capabilities'] = {
+        i: []
+        for i in [
+            'bounding',
+            'effective',
+            'inheritable',
+            'permitted',
+            'ambient',
+        ]
+    }
     out, _ = run_and_get_output(conf)
     proc_status = parse_proc_status(out)
 
-    for i in ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']:
-        if proc_status[i] != "0000000000000000":
-            return -1
-    return 0
+    return next(
+        (
+            -1
+            for i in ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']
+            if proc_status[i] != "0000000000000000"
+        ),
+        0,
+    )
 
 def test_unknown_caps():
     conf = base_config()
     conf['process']['args'] = ['/init', 'cat', '/proc/self/status']
     add_all_namespaces(conf)
-    conf['process']['capabilities'] = {}
-    # unknown caps must be ignored
-    for i in ['bounding', 'effective', 'inheritable', 'permitted', 'ambient']:
-        conf['process']['capabilities'][i] = ['CAP_UNKNOWN', 'UNKNOWN_CAP']
+    conf['process']['capabilities'] = {
+        i: ['CAP_UNKNOWN', 'UNKNOWN_CAP']
+        for i in [
+            'bounding',
+            'effective',
+            'inheritable',
+            'permitted',
+            'ambient',
+        ]
+    }
     out, _ = run_and_get_output(conf)
     proc_status = parse_proc_status(out)
 
-    for i in ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']:
-        if proc_status[i] != "0000000000000000":
-            return -1
-    return 0
+    return next(
+        (
+            -1
+            for i in ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']
+            if proc_status[i] != "0000000000000000"
+        ),
+        0,
+    )
 
 def test_new_privs():
     conf = base_config()
@@ -77,7 +109,7 @@ def test_new_privs():
     proc_status = parse_proc_status(out)
     no_new_privs = proc_status['NoNewPrivs']
     if no_new_privs != "1":
-        print("invalid value for NoNewPrivs, found %s" % no_new_privs)
+        print(f"invalid value for NoNewPrivs, found {no_new_privs}")
         return -1
 
     with open("/proc/self/status") as f:
@@ -93,7 +125,7 @@ def test_new_privs():
     proc_status = parse_proc_status(out)
     no_new_privs = proc_status['NoNewPrivs']
     if no_new_privs != "0":
-        print("invalid value for NoNewPrivs, found %s" % no_new_privs)
+        print(f"invalid value for NoNewPrivs, found {no_new_privs}")
         return -1
 
     return 0
@@ -109,9 +141,7 @@ def helper_test_some_caps(uid, captypes, proc_name):
     out, _ = run_and_get_output(conf)
     proc_status = parse_proc_status(out)
 
-    if proc_status[proc_name] != "0000000000200000":
-        return -1
-    return 0
+    return -1 if proc_status[proc_name] != "0000000000200000" else 0
 
 def test_some_caps_bounding():
     return helper_test_some_caps(0, ["bounding"], 'CapBnd')

@@ -62,7 +62,7 @@ def _get_cmdline(cid, tests_root):
     s = {}
     for _ in range(50):
         try:
-            if os.path.exists(os.path.join(tests_root, 'root/%s/status' % cid)):
+            if os.path.exists(os.path.join(tests_root, f'root/{cid}/status')):
                 s = json.loads(run_crun_command(["state", cid]))
                 break
             else:
@@ -77,7 +77,7 @@ def _get_cmdline(cid, tests_root):
         return ""
     if s['id'] != cid:
         return ""
-    with open("/proc/%s/cmdline" % s['pid'], 'r') as cmdline_fd:
+    with open(f"/proc/{s['pid']}/cmdline", 'r') as cmdline_fd:
         return cmdline_fd.read()
     return ""
 
@@ -97,20 +97,22 @@ def run_cr_test(conf):
         if first_cmdline == "":
             return -1
 
-        run_crun_command(["checkpoint", "--image-path=%s" % cr_dir, cid])
+        run_crun_command(["checkpoint", f"--image-path={cr_dir}", cid])
 
         bundle = os.path.join(
             get_tests_root(),
             cid.split('-')[1]
         )
 
-        run_crun_command([
-            "restore",
-            "-d",
-            "--image-path=%s" % cr_dir,
-            "--bundle=%s" % bundle,
-            cid
-        ])
+        run_crun_command(
+            [
+                "restore",
+                "-d",
+                f"--image-path={cr_dir}",
+                f"--bundle={bundle}",
+                cid,
+            ]
+        )
 
         second_cmdline = _get_cmdline(cid, get_tests_root())
         if first_cmdline != second_cmdline:
@@ -167,24 +169,21 @@ def test_cr_pre_dump():
             return -1
 
         # Let's do one pre-dump first
-        run_crun_command([
-            "checkpoint",
-            "--pre-dump",
-            "--image-path=%s" % cr_dir,
-            cid
-        ])
+        run_crun_command(["checkpoint", "--pre-dump", f"--image-path={cr_dir}", cid])
 
         # Get the size of the pre-dump
         pre_dump_size = _get_pre_dump_size(cr_dir)
 
         # Do the final dump. This dump should be much smaller.
         cr_dir = os.path.join(get_tests_root(), 'checkpoint')
-        run_crun_command([
-            "checkpoint",
-            "--parent-path=../pre-dump",
-            "--image-path=%s" % cr_dir,
-            cid
-        ])
+        run_crun_command(
+            [
+                "checkpoint",
+                "--parent-path=../pre-dump",
+                f"--image-path={cr_dir}",
+                cid,
+            ]
+        )
 
         final_dump_size = _get_pre_dump_size(cr_dir)
         if (final_dump_size > pre_dump_size):
@@ -197,13 +196,15 @@ def test_cr_pre_dump():
             cid.split('-')[1]
         )
 
-        run_crun_command([
-            "restore",
-            "-d",
-            "--image-path=%s" % cr_dir,
-            "--bundle=%s" % bundle,
-            cid
-        ])
+        run_crun_command(
+            [
+                "restore",
+                "-d",
+                f"--image-path={cr_dir}",
+                f"--bundle={bundle}",
+                cid,
+            ]
+        )
 
         second_cmdline = _get_cmdline(cid, get_tests_root())
         if first_cmdline != second_cmdline:

@@ -50,9 +50,9 @@ def test_uid_tty():
     cid = None
     ret = 1
     try:
-        cid = "container-%s" % os.getpid()
+        cid = f"container-{os.getpid()}"
         proc = run_and_get_output(conf, command='run', id_container=cid, use_popen=True)
-        for i in range(0, 500):
+        for _ in range(0, 500):
             try:
                 out = run_crun_command(["exec", "-t", "--user", "1", cid, "/init", "owner", "/proc/self/fd/0"])
                 if "1:" in out:
@@ -271,9 +271,18 @@ def test_exec_add_env():
                 return -1
         # check that the environment has the key/value pair we added
         for env, value in env_dict_new.items():
-            out = run_crun_command(["exec", "--env", "%s=%s" %(env,value), \
-                                     cid, "/init", "printenv", env])
-            env_args_list.append("%s=%s" %(env,value))
+            out = run_crun_command(
+                [
+                    "exec",
+                    "--env",
+                    f"{env}={value}",
+                    cid,
+                    "/init",
+                    "printenv",
+                    env,
+                ]
+            )
+            env_args_list.append(f"{env}={value}")
             if value not in out:
                 return -1
 

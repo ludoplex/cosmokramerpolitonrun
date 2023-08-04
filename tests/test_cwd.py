@@ -23,9 +23,7 @@ def test_cwd():
     conf['process']['cwd'] = "/var"
     add_all_namespaces(conf)
     out, _ = run_and_get_output(conf)
-    if "/var" not in out:
-        return -1
-    return 0
+    return -1 if "/var" not in out else 0
     
 all_tests = {
     "cwd" : test_cwd,

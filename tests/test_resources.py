@@ -38,10 +38,7 @@ def test_resources_fail_with_enoent():
     proc, _ = run_and_get_output(conf, use_popen=True)
     out, _ = proc.communicate()
 
-    if "no such file or directory" in out.decode().lower():
-        return 0
-
-    return -1
+    return 0 if "no such file or directory" in out.decode().lower() else -1
 
 def test_resources_pid_limit():
     if is_rootless():
@@ -109,10 +106,7 @@ def test_resources_unified_invalid_controller():
     add_all_namespaces(conf, cgroupns=True)
     conf['process']['args'] = ['/init', 'pause']
 
-    conf['linux']['resources'] = {}
-    conf['linux']['resources']['unified'] = {
-            "foo.bar": "doesntmatter"
-    }
+    conf['linux']['resources'] = {'unified': {"foo.bar": "doesntmatter"}}
     cid = None
     try:
         out, cid = run_and_get_output(conf, command='run', detach=True)
@@ -135,10 +129,7 @@ def test_resources_unified_invalid_key():
     add_all_namespaces(conf, cgroupns=True)
     conf['process']['args'] = ['/init', 'pause']
 
-    conf['linux']['resources'] = {}
-    conf['linux']['resources']['unified'] = {
-            "NOT-A-VALID-KEY": "doesntmatter"
-    }
+    conf['linux']['resources'] = {'unified': {"NOT-A-VALID-KEY": "doesntmatter"}}
     cid = None
     try:
         out, cid = run_and_get_output(conf, command='run', detach=True)
@@ -161,10 +152,7 @@ def test_resources_unified():
     add_all_namespaces(conf, cgroupns=True)
     conf['process']['args'] = ['/init', 'pause']
 
-    conf['linux']['resources'] = {}
-    conf['linux']['resources']['unified'] = {
-            "memory.high": "1073741824"
-    }
+    conf['linux']['resources'] = {'unified': {"memory.high": "1073741824"}}
     cid = None
     try:
         _, cid = run_and_get_output(conf, command='run', detach=True)
@@ -184,10 +172,7 @@ def test_resources_cpu_weight():
     add_all_namespaces(conf, cgroupns=True)
     conf['process']['args'] = ['/init', 'pause']
 
-    conf['linux']['resources'] = {}
-    conf['linux']['resources']['unified'] = {
-            "cpu.weight": "1234"
-    }
+    conf['linux']['resources'] = {'unified': {"cpu.weight": "1234"}}
     cid = None
     try:
         _, cid = run_and_get_output(conf, command='run', detach=True)
@@ -207,10 +192,7 @@ def test_resources_cpu_quota_minus_one():
     add_all_namespaces(conf, cgroupns=True)
     conf['process']['args'] = ['/init', 'cat', '/sys/fs/cgroup/cpu/cpu.cfs_quota_us']
 
-    conf['linux']['resources'] = {}
-    conf['linux']['resources']['cpu'] = {
-            "quota": -1
-    }
+    conf['linux']['resources'] = {'cpu': {"quota": -1}}
     cid = None
     try:
         out, cid = run_and_get_output(conf, command='run')
@@ -235,10 +217,7 @@ def test_resources_cpu_weight_systemd():
     add_all_namespaces(conf, cgroupns=True)
     conf['process']['args'] = ['/init', 'pause']
 
-    conf['linux']['resources'] = {}
-    conf['linux']['resources']['unified'] = {
-            "cpu.weight": "1234"
-    }
+    conf['linux']['resources'] = {'unified': {"cpu.weight": "1234"}}
     cid = None
     try:
         _, cid = run_and_get_output(conf, command='run', detach=True, cgroup_manager="systemd")

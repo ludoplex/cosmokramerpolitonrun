@@ -42,7 +42,9 @@ def test_owner_device():
             expected = "10:11"
             out = run_and_get_output(conf)
             if expected not in out[0]:
-                sys.stderr.write("wrong file owner, found %s instead of %s with userns=%s" % (out[0], expected, have_userns))
+                sys.stderr.write(
+                    f"wrong file owner, found {out[0]} instead of {expected} with userns={have_userns}"
+                )
                 return True
             return False
         except Exception as e:
